@@ -3,11 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
-import { Navigate } from "react-router-dom";
 import TaskForm from "@/components/TaskForm";
 import TaskItem from "@/components/TaskItem";
-import { Button } from "@/components/ui/button";
-import { LogOut, ListTodo, Search, Filter } from "lucide-react";
+import { ListTodo, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -16,18 +14,18 @@ interface Task {
   title: string;
   status: string;
   due_date: string | null;
+  priority: string;
 }
 
 type FilterStatus = "all" | "pending" | "completed";
 
 const Index = () => {
-  const { user, session, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterStatus>("all");
 
   const fetchTasks = async () => {
-    if (!user) return;
     const { data, error } = await supabase
       .from("tasks")
       .select("*")
@@ -40,16 +38,10 @@ const Index = () => {
   };
 
   useEffect(() => {
-    if (!authLoading && user) {
-      fetchTasks();
-    }
-  }, [user, authLoading]);
+    fetchTasks();
+  }, [user]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
-  if (authLoading) {
+  if (authLoading && loading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
         <div className="w-full max-w-md space-y-6">
@@ -62,10 +54,6 @@ const Index = () => {
         </div>
       </div>
     );
-  }
-
-  if (!session) {
-    return <Navigate to="/login" replace />;
   }
 
   const filteredTasks = tasks.filter(task => {
@@ -88,20 +76,10 @@ const Index = () => {
               <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Produtividade</p>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleLogout} 
-            className="rounded-full hover:bg-slate-100 h-10 w-10"
-            title="Sair"
-          >
-            <LogOut className="h-5 w-5 text-slate-500" />
-          </Button>
         </div>
       </header>
 
       <main className="max-w-md mx-auto px-4 pt-8 space-y-8">
-        {/* Formulário de Nova Tarefa */}
         <section className="space-y-3">
           <div className="flex items-center gap-2 px-1">
             <div className="h-4 w-1 bg-primary rounded-full" />
@@ -110,7 +88,6 @@ const Index = () => {
           <TaskForm onTaskCreated={fetchTasks} />
         </section>
 
-        {/* Filtros e Lista */}
         <section className="space-y-5">
           <div className="flex flex-col gap-4 px-1">
             <div className="flex items-center justify-between">
