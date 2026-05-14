@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, Loader2, Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { showSuccess, showError } from "@/utils/toast";
@@ -11,6 +11,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TaskFormProps {
   onTaskCreated: () => void;
@@ -20,6 +27,7 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
   const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
+  const [priority, setPriority] = useState("medium");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,6 +40,7 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
         title: title.trim(),
         user_id: user.id,
         due_date: dueDate?.toISOString() || null,
+        priority,
         status: "pending",
       },
     ]);
@@ -43,8 +52,15 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
       showSuccess("Tarefa criada!");
       setTitle("");
       setDueDate(undefined);
+      setPriority("medium");
       onTaskCreated();
     }
+  };
+
+  const priorityColors = {
+    low: "text-blue-500",
+    medium: "text-amber-500",
+    high: "text-rose-500",
   };
 
   return (
@@ -77,7 +93,7 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
               )}
             >
               <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-              {dueDate ? format(dueDate, "dd/MM/yyyy") : "Adicionar data"}
+              {dueDate ? format(dueDate, "dd/MM/yyyy") : "Data"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -89,6 +105,20 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
             />
           </PopoverContent>
         </Popover>
+
+        <Select value={priority} onValueChange={setPriority}>
+          <SelectTrigger className="h-8 w-auto rounded-full text-[11px] font-bold uppercase tracking-wider px-3 border-none bg-transparent hover:bg-slate-100 shadow-none focus:ring-0">
+            <div className="flex items-center gap-1.5">
+              <Flag className={cn("h-3 w-3 fill-current", priorityColors[priority as keyof typeof priorityColors])} />
+              <SelectValue placeholder="Prioridade" />
+            </div>
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            <SelectItem value="low" className="text-xs">Baixa</SelectItem>
+            <SelectItem value="medium" className="text-xs">Média</SelectItem>
+            <SelectItem value="high" className="text-xs">Alta</SelectItem>
+          </SelectContent>
+        </Select>
         
         {dueDate && (
           <Button 

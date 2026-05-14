@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Trash2, Calendar, Pencil } from "lucide-react";
+import { Trash2, Calendar, Pencil, Flag } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
@@ -15,6 +15,7 @@ interface Task {
   title: string;
   status: string;
   due_date: string | null;
+  priority: string;
 }
 
 interface TaskItemProps {
@@ -50,6 +51,14 @@ const TaskItem = ({ task, onUpdate }: TaskItemProps) => {
     }
   };
 
+  const priorityConfig = {
+    low: { color: "text-blue-500", label: "Baixa" },
+    medium: { color: "text-amber-500", label: "Média" },
+    high: { color: "text-rose-500", label: "Alta" },
+  };
+
+  const currentPriority = priorityConfig[task.priority as keyof typeof priorityConfig] || priorityConfig.medium;
+
   return (
     <>
       <div className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-sm border group transition-all hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -65,12 +74,18 @@ const TaskItem = ({ task, onUpdate }: TaskItemProps) => {
           )}>
             {task.title}
           </p>
-          {task.due_date && (
-            <div className="flex items-center text-xs text-muted-foreground mt-1">
-              <Calendar className="h-3.5 w-3.5 mr-1.5" />
-              {format(new Date(task.due_date), "dd/MM/yyyy")}
+          <div className="flex items-center gap-3 mt-1">
+            {task.due_date && (
+              <div className="flex items-center text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                <Calendar className="h-3 w-3 mr-1" />
+                {format(new Date(task.due_date), "dd/MM/yy")}
+              </div>
+            )}
+            <div className={cn("flex items-center text-[10px] font-bold uppercase tracking-wider", currentPriority.color)}>
+              <Flag className="h-3 w-3 mr-1 fill-current" />
+              {currentPriority.label}
             </div>
-          )}
+          </div>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
