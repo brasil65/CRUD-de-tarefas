@@ -43,10 +43,11 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
     if (!title.trim()) return;
 
     setLoading(true);
+    
     const { error } = await supabase.from("tasks").insert([
       {
         title: title.trim(),
-        user_id: user?.id || null, // Permite nulo se não logado para fins de demo
+        user_id: user?.id || null, 
         due_date: dueDate?.toISOString() || null,
         priority,
         category,
@@ -56,7 +57,12 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
 
     setLoading(false);
     if (error) {
-      showError("Erro ao criar tarefa");
+      console.error("Erro ao criar tarefa:", error);
+      if (error.code === '23502') {
+        showError("O banco de dados exige login. Altere a coluna 'user_id' para opcional no Supabase.");
+      } else {
+        showError(`Erro: ${error.message}`);
+      }
     } else {
       showSuccess("Tarefa criada!");
       setTitle("");
