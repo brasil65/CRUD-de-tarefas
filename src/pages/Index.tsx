@@ -3,11 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
-import { Navigate } from "react-router-dom";
 import TaskForm from "@/components/TaskForm";
 import TaskItem from "@/components/TaskItem";
-import { Button } from "@/components/ui/button";
-import { LogOut, ListTodo, Search, Filter } from "lucide-react";
+import { ListTodo, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -16,22 +14,25 @@ interface Task {
   title: string;
   status: string;
   due_date: string | null;
+  priority: string;
 }
 
 type FilterStatus = "all" | "pending" | "completed";
 
 const Index = () => {
-  const { user, session, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterStatus>("all");
 
   const fetchTasks = async () => {
-    if (!user) return;
-    const { data, error } = await supabase
+    // Busca todas as tarefas (as políticas de RLS do Supabase ainda se aplicam se houver usuário)
+    const query = supabase
       .from("tasks")
       .select("*")
       .order("created_at", { ascending: false });
+
+    const { data, error } = await query;
 
     if (!error && data) {
       setTasks(data);
@@ -40,14 +41,10 @@ const Index = () => {
   };
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading) {
       fetchTasks();
     }
   }, [user, authLoading]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
 
   if (authLoading) {
     return (
@@ -62,10 +59,6 @@ const Index = () => {
         </div>
       </div>
     );
-  }
-
-  if (!session) {
-    return <Navigate to="/login" replace />;
   }
 
   const filteredTasks = tasks.filter(task => {
@@ -88,15 +81,6 @@ const Index = () => {
               <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Produtividade</p>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleLogout} 
-            className="rounded-full hover:bg-slate-100 h-10 w-10"
-            title="Sair"
-          >
-            <LogOut className="h-5 w-5 text-slate-500" />
-          </Button>
         </div>
       </header>
 
