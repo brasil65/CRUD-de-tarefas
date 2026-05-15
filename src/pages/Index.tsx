@@ -6,13 +6,22 @@ import { useAuth } from "@/components/AuthProvider";
 import TaskForm from "@/components/TaskForm";
 import TaskItem from "@/components/TaskItem";
 import StatsOverview from "@/components/StatsOverview";
-import { ListTodo, Filter, Search, Trash2, X, LayoutDashboard } from "lucide-react";
+import { ListTodo, Filter, Search, Trash2, X, LayoutDashboard, LogIn, LogOut, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { showSuccess, showError } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Task {
   id: string;
@@ -27,6 +36,7 @@ type FilterStatus = "all" | "pending" | "completed";
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterStatus>("all");
@@ -39,10 +49,6 @@ const Index = () => {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      // Ordenação Inteligente: 
-      // 1. Pendentes antes de concluídas
-      // 2. Por prioridade (high > medium > low)
-      // 3. Por data (mais próximas primeiro)
       const priorityMap: Record<string, number> = { high: 3, medium: 2, low: 1 };
       
       const sorted = [...data].sort((a, b) => {
@@ -78,6 +84,12 @@ const Index = () => {
       showSuccess("Tarefas concluídas removidas");
       fetchTasks();
     }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    showSuccess("Até logo!");
+    fetchTasks();
   };
 
   useEffect(() => {
@@ -120,7 +132,40 @@ const Index = () => {
               <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Produtividade</p>
             </div>
           </div>
-          <ThemeToggle />
+          
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-slate-500">
+                    <User className="h-[1.2rem] w-[1.2rem]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 rounded-xl">
+                  <DropdownMenuLabel className="font-bold">Minha Conta</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-xs text-slate-500 py-2">
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-rose-500 focus:text-rose-500 font-bold">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => navigate('/login')}
+                className="rounded-xl h-10 w-10 text-slate-500"
+              >
+                <LogIn className="h-[1.2rem] w-[1.2rem]" />
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
