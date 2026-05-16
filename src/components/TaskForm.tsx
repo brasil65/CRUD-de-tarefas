@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Calendar as CalendarIcon, Loader2, Flag, Tag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/AuthProvider";
 import { showSuccess, showError } from "@/utils/toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -31,7 +30,6 @@ const CATEGORIES = [
 ];
 
 const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
-  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState("medium");
@@ -47,7 +45,6 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
     const { error } = await supabase.from("tasks").insert([
       {
         title: title.trim(),
-        user_id: user?.id || null, 
         due_date: dueDate?.toISOString() || null,
         priority,
         category,
@@ -57,12 +54,7 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
 
     setLoading(false);
     if (error) {
-      console.error("Erro ao criar tarefa:", error);
-      if (error.code === '23502') {
-        showError("O banco de dados exige login. Altere a coluna 'user_id' para opcional no Supabase.");
-      } else {
-        showError(`Erro: ${error.message}`);
-      }
+      showError(`Erro: ${error.message}`);
     } else {
       showSuccess("Tarefa criada!");
       setTitle("");
