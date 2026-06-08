@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/auth/AuthProvider";
-import { ListTodo, Plus, Trash2, Check, X, LogOut, User } from "lucide-react";
+import { ListTodo, Plus, Trash2, Check, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { showSuccess, showError } from "@/utils/toast";
@@ -17,28 +16,33 @@ interface Task {
   created_at: string;
 }
 
-/**
- * Tela principal do aplicativo.
- * Exibe lista de tarefas e permite criar, concluir e excluir.
- */
 const Index = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   const fetchTasks = async () => {
-    const { data, error } = await supabase
-      .from("tasks")
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (!error && data) {
-      setTasks(data);
+      if (error) {
+        console.error("Erro ao buscar tarefas:", error);
+        showError("Erro ao carregar tarefas");
+        return;
+      }
+
+      setTasks(data || []);
+    } catch (err) {
+      console.error("Erro:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const addTask = async (e: React.FormEvent) => {
@@ -98,6 +102,12 @@ const Index = () => {
   };
 
   useEffect(() => {
+    // Pega o usuário atual
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        setUserEmail(user.email.split("@")[0]);
+      }
+    });
     fetchTasks();
   }, []);
 
@@ -110,14 +120,14 @@ const Index = () => {
       <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b dark:border-slate-800 px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="bg-primary p-2.5 rounded-xl text-primary-foreground shadow-lg shadow-primary/20">
+            <div className="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg">
               <ListTodo className="h-5 w-5" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">
                 FlowTasks
               </h1>
-              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+              <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">
                 Minhas Tarefas
               </p>
             </div>
@@ -127,7 +137,7 @@ const Index = () => {
             <div className="flex items-center gap-2 mr-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full">
               <User className="h-3.5 w-3.5 text-slate-500" />
               <span className="text-xs font-medium text-slate-600 dark:text-slate-300 max-w-[80px] truncate">
-                {user?.email?.split("@")[0]}
+                {userEmail}
               </span>
             </div>
             <ThemeToggle />
@@ -177,19 +187,26 @@ const Index = () => {
             placeholder="Adicionar nova tarefa..."
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
-            className="flex-1 h-12 rounded-xl bg-white dark:bg-slate-900 border-none shadow-sm focus-visible:ring-2 focus-visible:ring-primary/20"
+            className="flex-1 h-12 rounded-xl bg-white dark:bg-slate-900 border-none shadow-sm"
           />
           <Button
             type="submit"
             disabled={saving || !newTask.trim()}
-            className="h-12 w-12 rounded-xl p-0 shadow-lg shadow-primary/20"
+            className="h-12 w-12 rounded-xl p-0 bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="h-5 w-5" />
           </Button>
         </form>
 
+        {/* Loading */}
+        {loading && (
+          <div className="text-center py-8">
+            <p className="text-slate-500">Carregando tarefas...</p>
+          </div>
+        )}
+
         {/* Pending Tasks */}
-        {pendingTasks.length > 0 && (
+        {!loading && pendingTasks.length > 0 && (
           <section className="space-y-2">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">
               Pendentes ({pendingTasks.length})
@@ -203,11 +220,7 @@ const Index = () => {
                   <button
                     onClick={() => toggleTask(task)}
                     className="h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-600 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 flex items-center justify-center transition-colors"
-                  >
-                    {task.status === "completed" && (
-                      <Check className="h-4 w-4 text-emerald-500" />
-                    )}
-                  </button>
+                  />
                   <p className="flex-1 text-slate-700 dark:text-slate-200">
                     {task.title}
                   </p>
@@ -224,7 +237,7 @@ const Index = () => {
         )}
 
         {/* Completed Tasks */}
-        {completedTasks.length > 0 && (
+        {!loading && completedTasks.length > 0 && (
           <section className="space-y-2">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">
               Concluídas ({completedTasks.length})
@@ -257,7 +270,7 @@ const Index = () => {
         )}
 
         {/* Empty State */}
-        {tasks.length === 0 && !loading && (
+        {!loading && tasks.length === 0 && (
           <div className="text-center py-16">
             <div className="bg-slate-100 dark:bg-slate-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <ListTodo className="h-8 w-8 text-slate-400" />
