@@ -24,16 +24,11 @@ const App = () => (
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AuthProvider>
             <Routes>
-              {/* Rotas públicas */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-
-              {/* Rotas protegidas */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<Index />} />
               </Route>
-
-              {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>

@@ -10,18 +10,35 @@ import { showSuccess, showError } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListTodo, Mail, Lock, User, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ListTodo,
+  Mail,
+  Lock,
+  User,
+  Loader2,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 
-const registerSchema = z.object({
-  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+    email: z.string().email("Email inválido"),
+    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -108,19 +125,22 @@ const Register = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-3 group">
             <div className="bg-primary p-3 rounded-2xl text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
               <ListTodo className="h-7 w-7" />
             </div>
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">FlowTasks</span>
+            <span className="text-2xl font-bold text-slate-900 dark:text-white">
+              FlowTasks
+            </span>
           </Link>
         </div>
 
         <Card className="border-none shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 rounded-3xl">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-bold text-center">Criar sua conta</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Criar sua conta
+            </CardTitle>
             <CardDescription className="text-center text-base">
               Comece a organizar suas tarefas agora
             </CardDescription>
@@ -142,7 +162,9 @@ const Register = () => {
                   />
                 </div>
                 {errors.name && (
-                  <p className="text-xs text-destructive">{errors.name.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.name.message}
+                  </p>
                 )}
               </div>
 
@@ -161,7 +183,9 @@ const Register = () => {
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -180,12 +204,17 @@ const Register = () => {
                   />
                 </div>
                 {errors.password && (
-                  <p className="text-xs text-destructive">{errors.password.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-sm font-medium"
+                >
                   Confirmar Senha
                 </Label>
                 <div className="relative">
@@ -199,7 +228,9 @@ const Register = () => {
                   />
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
 
@@ -225,7 +256,9 @@ const Register = () => {
                 <div className="w-full border-t border-slate-200 dark:border-slate-800" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-3 text-muted-foreground font-medium">ou</span>
+                <span className="bg-card px-3 text-muted-foreground font-medium">
+                  ou
+                </span>
               </div>
             </div>
             <p className="text-center text-sm text-muted-foreground">
