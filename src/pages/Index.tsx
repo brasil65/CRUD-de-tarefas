@@ -2,16 +2,18 @@
 
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/auth/AuthProvider";
 import TaskForm from "@/components/TaskForm";
 import TaskItem from "@/components/TaskItem";
 import StatsOverview from "@/components/StatsOverview";
-import { ListTodo, Filter, Search, Trash2, X, LayoutDashboard } from "lucide-react";
+import { ListTodo, Filter, Search, Trash2, X, LayoutDashboard, LogOut, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { showSuccess, showError } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface Task {
   id: string;
@@ -25,6 +27,8 @@ interface Task {
 type FilterStatus = "all" | "pending" | "completed";
 
 const Index = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterStatus>("all");
@@ -74,6 +78,16 @@ const Index = () => {
     }
   };
 
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      showError("Erro ao sair");
+    } else {
+      showSuccess("Até logo!");
+      navigate("/login");
+    }
+  };
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -102,7 +116,21 @@ const Index = () => {
           </div>
           
           <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2 mr-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full">
+              <User className="h-3.5 w-3.5 text-slate-500" />
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-300 max-w-[80px] truncate">
+                {user?.email?.split("@")[0]}
+              </span>
+            </div>
             <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="rounded-xl h-10 w-10 text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </header>
