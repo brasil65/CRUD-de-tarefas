@@ -1,3 +1,4 @@
+' para garantir compilação sem erros no JSX na Vercel">
 "use client";
 
 import React, { useState } from "react";
@@ -53,7 +54,7 @@ export const ConfigError = () => {
             </h2>
             <ol className="list-decimal list-inside text-[11px] text-slate-500 dark:text-slate-400 space-y-1.5 leading-relaxed">
               <li>Abra o painel do projeto na <strong>Vercel</strong>.</li>
-              <li>Acesse <strong>Settings</strong> > <strong>Environment Variables</strong>.</li>
+              <li>Acesse <strong>Settings</strong> {" > "} <strong>Environment Variables</strong>.</li>
               <li>Insira as variáveis <code className="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded text-primary font-bold">VITE_SUPABASE_URL</code> e <code className="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded text-primary font-bold">VITE_SUPABASE_ANON_KEY</code>.</li>
               <li>Efetue um novo <strong>Redeploy</strong> na Vercel para aplicar as chaves.</li>
             </ol>
@@ -69,3 +70,5 @@ export const ConfigError = () => {
     </div>
   );
 };
+
+export default ConfigError;
