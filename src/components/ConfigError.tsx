@@ -1,4 +1,3 @@
-' para garantir compilação sem erros no JSX na Vercel">
 "use client";
 
 import React, { useState } from "react";
