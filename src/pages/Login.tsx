@@ -266,7 +266,7 @@ const Login = () => {
 
         {/* Footer */}
         <p className="text-center text-xs text-slate-400 mt-6">
-          Desenvolvido com ❤️ usando Dyad
+          Desenvolvido por FREDERICO BRASIL usando Dyad
         </p>
       </div>
     </div>
