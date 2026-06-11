@@ -57,13 +57,16 @@ Regra prática:
 - Named exports para componentes de feature. Default export só em pages.
 - Imports absolutos com alias `@/`.
 - Sem `console.log`. Sem código comentado morto.
+- **Nunca** pratique o *hardcode*
 
 ---
 
 ## Contextos — Arquitetura do Projeto
 
 O projeto é dividido em contextos funcionais em `src/contexts/<nome>/`. Cada contexto tem:
-- `README.md` — arquitetura, tabelas usadas, decisões técnicas. **Sempre atualizar após mudanças.**
+- `README.md` — arquitetura, tabelas usadas, decisões técnicas. 
+
+**Sempre atualizar após mudanças.**
 - `components/`, `hooks/`, `services/`, `<nome>.types.ts`
 
 **Regra obrigatória:** ao criar um novo contexto em `src/contexts/<nome>/`, criar também o `README.md` desse contexto no mesmo commit.
