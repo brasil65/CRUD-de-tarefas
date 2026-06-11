@@ -41,7 +41,15 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
     if (!title.trim()) return;
 
     setLoading(true);
-    
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      showError("Você precisa estar logado para criar tarefas");
+      setLoading(false);
+      return;
+    }
+
     const { error } = await supabase.from("tasks").insert([
       {
         title: title.trim(),
@@ -49,6 +57,7 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
         priority,
         category,
         status: "pending",
+        user_id: user.id,
       },
     ]);
 
@@ -79,15 +88,15 @@ const TaskForm = ({ onTaskCreated }: TaskFormProps) => {
           onChange={(e) => setTitle(e.target.value)}
           className="flex-1 rounded-xl bg-white dark:bg-slate-900 border-none shadow-sm h-12 px-4 focus-visible:ring-2 focus-visible:ring-primary/20"
         />
-        <Button 
-          type="submit" 
-          disabled={loading || !title.trim()} 
+        <Button
+          type="submit"
+          disabled={loading || !title.trim()}
           className="rounded-xl h-12 w-12 p-0 shadow-lg shadow-primary/20"
         >
           {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-6 w-6" />}
         </Button>
       </div>
-      
+
       <div className="flex flex-wrap items-center gap-2">
         <Popover>
           <PopoverTrigger asChild>

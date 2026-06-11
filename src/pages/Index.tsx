@@ -33,21 +33,27 @@ const Index = () => {
   const [search, setSearch] = useState("");
 
   const fetchTasks = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     const { data, error } = await supabase
       .from("tasks")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (!error && data) {
       const priorityMap: Record<string, number> = { high: 3, medium: 2, low: 1 };
-      
+
       const sorted = [...data].sort((a, b) => {
         if (a.status !== b.status) {
           return a.status === "pending" ? -1 : 1;
         }
         if (a.status === "pending") {
           if (a.priority !== b.priority) {
-            return priorityMap[b.priority] - priorityMap[a.priority];
+            return (priorityMap[b.priority] || 0) - (priorityMap[a.priority] || 0);
           }
           if (a.due_date && b.due_date) {
             return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
@@ -63,10 +69,13 @@ const Index = () => {
   };
 
   const clearCompleted = async () => {
+    if (!user) return;
+
     const { error } = await supabase
       .from("tasks")
       .delete()
-      .eq("status", "completed");
+      .eq("status", "completed")
+      .eq("user_id", user.id);
 
     if (error) {
       showError("Erro ao limpar tarefas");
@@ -87,7 +96,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [user]);
 
   const filteredTasks = tasks.filter(task => {
     const matchesFilter = filter === "all" || task.status === filter;
@@ -95,7 +104,7 @@ const Index = () => {
     return matchesFilter && matchesSearch;
   });
 
-  const completedCount = tasks.filter(t => t.status === 'completed').length;
+  const completedCount = tasks.filter(t => t.status === "completed").length;
   const pendingCount = tasks.length - completedCount;
 
   return (
@@ -111,7 +120,7 @@ const Index = () => {
               <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Produtividade</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <Button
@@ -128,7 +137,6 @@ const Index = () => {
       </header>
 
       <main className="max-w-md mx-auto px-4 pt-6 space-y-8">
-        {/* User Info */}
         {user && (
           <div className="flex items-center gap-3 px-1">
             <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl">
@@ -143,22 +151,22 @@ const Index = () => {
           </div>
         )}
 
-        <StatsOverview 
-          total={tasks.length} 
-          completed={completedCount} 
-          pending={pendingCount} 
+        <StatsOverview
+          total={tasks.length}
+          completed={completedCount}
+          pending={pendingCount}
         />
 
         <div className="relative group">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-          <Input 
+          <Input
             placeholder="Pesquisar tarefas..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 h-11 rounded-2xl bg-white dark:bg-slate-900 border-none shadow-sm focus-visible:ring-2 focus-visible:ring-primary/20"
           />
           {search && (
-            <button 
+            <button
               onClick={() => setSearch("")}
               className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
@@ -184,9 +192,9 @@ const Index = () => {
               </div>
               <div className="flex items-center gap-4">
                 {completedCount > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={clearCompleted}
                     className="h-7 text-[10px] font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 uppercase tracking-wider px-2"
                   >
@@ -196,7 +204,7 @@ const Index = () => {
                 )}
               </div>
             </div>
-            
+
             <Tabs defaultValue="all" className="w-full" onValueChange={(val) => setFilter(val as FilterStatus)}>
               <TabsList className="grid w-full grid-cols-3 bg-slate-100 dark:bg-slate-900 p-1 h-11 rounded-xl">
                 <TabsTrigger value="all" className="rounded-lg text-xs font-semibold">Todas</TabsTrigger>
@@ -220,10 +228,10 @@ const Index = () => {
                 </div>
                 <h3 className="text-slate-900 dark:text-white font-bold mb-1">Fim da lista</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[200px] mx-auto">
-                  {search 
+                  {search
                     ? `Nenhuma tarefa encontrada para "${search}"`
-                    : filter === "all" 
-                    ? "Você concluiu tudo! Tempo de descansar." 
+                    : filter === "all"
+                    ? "Você concluiu tudo! Tempo de descansar."
                     : `Sem tarefas ${filter === "pending" ? "pendentes" : "concluídas"}.`}
                 </p>
               </div>
