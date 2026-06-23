@@ -1,8 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
 
@@ -15,8 +26,11 @@ interface TrashItemProps {
 
 /**
  * Item visualizado na lixeira com opções de restaurar ou excluir permanentemente.
+ * A exclusão permanente exige confirmação via AlertDialog.
  */
 const TrashItem = ({ id, title, onRestore, onPermanentDelete }: TrashItemProps) => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   const restoreTask = async () => {
     const { error } = await supabase
       .from("tasks")
@@ -39,6 +53,7 @@ const TrashItem = ({ id, title, onRestore, onPermanentDelete }: TrashItemProps) 
       showSuccess("Tarefa excluída permanentemente");
       onPermanentDelete();
     }
+    setConfirmOpen(false);
   };
 
   return (
@@ -58,15 +73,38 @@ const TrashItem = ({ id, title, onRestore, onPermanentDelete }: TrashItemProps) 
         >
           <RotateCcw className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={permanentDelete}
-          className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
-          title="Excluir permanentemente"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+              title="Excluir permanentemente"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir permanentemente?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação não pode ser desfeita. A tarefa{" "}
+                <span className="font-semibold text-rose-600 dark:text-rose-400">"{title}"</span>{" "}
+                será removida definitivamente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={permanentDelete}
+                className="bg-rose-600 hover:bg-rose-700 text-white"
+              >
+                Excluir permanentemente
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
