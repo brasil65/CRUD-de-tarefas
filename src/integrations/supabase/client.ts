@@ -18,3 +18,30 @@ export const supabase = isSupabaseConfigured
         };
       }
     });
+
+/**
+ * Verifica se a conexão com o Supabase está funcionando e se os grants
+ * da tabela tasks estão corretos. Útil para diagnóstico de problemas de
+ * Data API (PostgREST rejeitando requisições por falta de GRANT).
+ *
+ * @returns true se a conexão e grants estão OK, false caso contrário
+ */
+export async function checkSupabaseConnection(): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+
+  try {
+    const { error } = await supabase
+      .from('tasks')
+      .select('id', { count: 'exact', head: true });
+
+    if (error) {
+      console.error('[Supabase] Connection check failed:', error.message);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('[Supabase] Connection check exception:', err);
+    return false;
+  }
+}

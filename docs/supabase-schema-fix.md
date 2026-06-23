@@ -10,43 +10,9 @@ This happens because:
 
 ## Solution
 
-### 1. Add Missing Columns to Tasks Table
-Run this SQL in the Supabase SQL editor:
-
-```sql
--- Add category column if it doesn't exist
-DO $$ 
-BEGIN 
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name = 'tasks' AND column_name = 'category') THEN
-    ALTER TABLE tasks ADD COLUMN category TEXT DEFAULT 'personal';
-  END IF;
-END $$;
-
--- Add priority column if it doesn't exist
-DO $$ 
-BEGIN 
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name = 'tasks' AND column_name = 'priority') THEN
-    ALTER TABLE tasks ADD COLUMN priority TEXT DEFAULT 'medium';
-  END IF;
-END $$;
-
--- Make user_id nullable (if needed for guest users)
-ALTER TABLE tasks ALTER COLUMN user_id DROP NOT NULL;
-```
-
-### 2. Clear Supabase Schema Cache
-After updating the schema, clear the cache:
-
-```bash
-curl -X POST "https://jtfmkkaapsvthslsseem.supabase.co/clear-cache" \
-  -H "Authorization: Bearer YOUR_PUBLIC_KEY"
-```
-Replace `YOUR_PUBLIC_KEY` with your Supabase anon key.
-
-### 3. Restart Application
-Restart your frontend application to ensure it picks up the updated schema.
+See **[docs/fix-database.md](./fix-database.md)** for the complete, up-to-date fix instructions including:
+- Adding missing `category` and `priority` columns
+- Fixing missing Data API grants (critical for PostgREST access)
 
 ## Verification
 Check that the columns exist in your Supabase Dashboard:
