@@ -12,6 +12,16 @@ import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { showSuccess, showError } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/components/AuthProvider";
 import TrashSection from "@/components/TrashSection";
 
@@ -34,6 +44,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterStatus>("all");
   const [search, setSearch] = useState("");
+  const [confirmClear, setConfirmClear] = useState(false);
 
   const fetchTasks = async () => {
     if (!user) {
@@ -219,7 +230,7 @@ const Index = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={clearCompleted}
+                    onClick={() => setConfirmClear(true)}
                     className="h-7 text-[10px] font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 uppercase tracking-wider px-2"
                   >
                     <Trash2 className="h-3 w-3 mr-1" />
@@ -271,6 +282,26 @@ const Index = () => {
           />
         )}
       </main>
+
+      <AlertDialog open={confirmClear} onOpenChange={setConfirmClear}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar concluídas?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Todas as tarefas concluídas serão movidas para a lixeira.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={clearCompleted}
+              className="bg-rose-600 hover:bg-rose-700 text-white"
+            >
+              Limpar concluídas
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

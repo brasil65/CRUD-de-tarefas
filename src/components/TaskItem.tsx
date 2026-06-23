@@ -3,6 +3,17 @@
 import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Trash2, Calendar, Pencil, Flag, AlertCircle } from "lucide-react";
 import { format, isPast, isToday } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -131,14 +142,36 @@ const TaskItem = ({ task, onUpdate }: TaskItemProps) => {
           >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={deleteTask}
-            className="h-8 w-8 text-slate-400 hover:text-destructive hover:bg-rose-50 dark:hover:bg-rose-900/20"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-slate-400 hover:text-destructive hover:bg-rose-50 dark:hover:bg-rose-900/20"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Mover para a lixeira?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  A tarefa{" "}
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">"{task.title}"</span>{" "}
+                  será movida para a lixeira.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={deleteTask}
+                  className="bg-rose-600 hover:bg-rose-700 text-white"
+                >
+                  Mover para lixeira
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 

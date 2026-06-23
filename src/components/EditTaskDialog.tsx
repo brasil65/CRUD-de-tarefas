@@ -8,6 +8,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -46,6 +56,7 @@ const EditTaskDialog = ({ task, open, onOpenChange, onUpdate }: EditTaskDialogPr
   );
   const [priority, setPriority] = useState(task.priority || "medium");
   const [loading, setLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleUpdate = async () => {
     if (!title.trim()) return;
@@ -142,11 +153,31 @@ const EditTaskDialog = ({ task, open, onOpenChange, onUpdate }: EditTaskDialogPr
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none rounded-xl">
             Cancelar
           </Button>
-          <Button onClick={handleUpdate} disabled={loading} className="flex-1 sm:flex-none rounded-xl px-10 shadow-lg shadow-primary/20">
+          <Button onClick={() => setConfirmOpen(true)} disabled={loading} className="flex-1 sm:flex-none rounded-xl px-10 shadow-lg shadow-primary/20">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
           </Button>
         </DialogFooter>
       </DialogContent>
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Salvar alterações?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja salvar as alterações em{" "}
+              <span className="font-semibold text-slate-900 dark:text-slate-100">"{title}"</span>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUpdate}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Salvar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
